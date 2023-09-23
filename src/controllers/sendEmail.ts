@@ -1,11 +1,12 @@
 import { RequestHandler } from 'express';
-import mailSender from '../services/email';
 import { SentMessageInfo } from 'nodemailer';
+import mailSender from '../services/email';
+import arrayToCSV from '../services/arrayToCSV';
 import { BadRequest } from '../errors';
 import { StatusCodes } from 'http-status-codes';
 
 type SendMailRequest = { receivers: Array<string> };
-type SendMailResponse = { sentStatus: Array<SentMessageInfo> };
+type SendMailResponse = { sentStatus: SentMessageInfo };
 type SendMailHandler = RequestHandler<
     object,
     SendMailResponse,
@@ -13,18 +14,12 @@ type SendMailHandler = RequestHandler<
 >;
 
 const sendEmail: SendMailHandler = async function (req, res) {
-    const receiversList = req.body.receivers;
+    const receiversList = arrayToCSV(req.body.receivers);
     if (!receiversList || receiversList.length == 0) {
         throw new BadRequest('Provide a Receiver');
     }
 
-    let sentStatus: Array<SentMessageInfo> = [];
-
-    for (const receiver of receiversList) {
-        sentStatus.push(mailSender(receiver));
-    }
-
-    sentStatus = await Promise.all(sentStatus);
+    const sentStatus = await mailSender(receiversList);
 
     res.status(StatusCodes.OK).json({ sentStatus });
 };
