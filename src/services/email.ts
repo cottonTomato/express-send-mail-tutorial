@@ -15,10 +15,10 @@ function verdict() {
     return Math.random() > 0.5 ? 'Yes, Gay' : 'No, Straight';
 }
 
-function mailSender(receivers: string) {
+function mailSender(receiver: string) {
     return transporter.sendMail({
         from: `${process.env.MAIL_USER}`,
-        to: receivers,
+        to: receiver,
         subject: 'Auto Mail Testing',
         html: `<h1> Are you Gay? </h1>
         <h3> Verdict is: <b>${verdict()}</b></h3>
